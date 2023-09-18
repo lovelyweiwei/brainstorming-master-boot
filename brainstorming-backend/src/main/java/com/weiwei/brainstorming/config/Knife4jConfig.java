@@ -33,5 +33,6 @@ public class Knife4jConfig {
                 .apis(RequestHandlerSelectors.basePackage("com.weiwei.brainstorming.controller"))
                 .paths(PathSelectors.any())
                 .build();
+
     }
 }

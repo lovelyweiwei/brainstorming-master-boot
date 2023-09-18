@@ -88,7 +88,7 @@ Brainstorming OJ 系统是一个在线算法评测系统，用户可以选择题
 ### 服务模块划分
 
 1. brainstorming-backend-common：系统通用模块，比如用户角色权限校验，异常处理，统一返回值，常量，工具类等
-3. brainstorming-backend-gateway：系统网关模块：实现了给前端返回统一接口路由，聚合文档（Knife4j），全局跨域配置，权限校验（JWT Token）等
+3. brainstorming-backend-gateway：系统网关模块：实现了给前端返回统一接口路由，聚合文档（Knife4j），全局跨域配置等
 4. brainstorming-backend-judge-service：系统判题模块：调用远程代码沙箱接口，实现工厂模式、策略模式、代理模式，验证代码沙箱执行结果是否正确与错误，使用消息队列实现异步处理消息
 5. brainstorming-backend-model：系统实体模块，比如用户实体类、题目实体类，VO、枚举等
 6. brainstorming-backend-question-service：系统题目模块：题目的增删改查、题目提交限流、使用消息队列异步处理消息

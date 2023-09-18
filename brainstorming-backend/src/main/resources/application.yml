@@ -25,16 +25,16 @@ spring:
   # Redis 配置
   redis:
     database: 2
-#    host: 192.168.40.129
-    host: localhost
+    host: 192.168.40.129
+#    host: localhost
     port: 6379
     timeout: 5000
     password: 666
 
   # RabbitMQ 配置
   rabbitmq:
-#    host: 192.168.40.134
-    host: localhost
+    host: 192.168.40.134
+#    host: localhost
     port: 5672
     username: admin
     password: admin

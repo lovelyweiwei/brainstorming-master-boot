@@ -20,6 +20,7 @@
   </div>
 </template>
 
+
 <style scoped>
 #userLayout {
   text-align: center;

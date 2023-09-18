@@ -18,8 +18,6 @@ import java.util.List;
 @NoArgsConstructor
 public class ExecuteCodeResponse {
 
-    private List<String> outputList;
-
     /**
      * 接口信息
      */
@@ -33,5 +31,6 @@ public class ExecuteCodeResponse {
     /**
      * 判题信息
      */
-    private JudgeInfo judgeInfo;
+    private List<ExecuteMessage> results;
+
 }

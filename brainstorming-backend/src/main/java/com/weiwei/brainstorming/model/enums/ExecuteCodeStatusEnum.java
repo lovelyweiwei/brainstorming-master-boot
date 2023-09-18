@@ -1,26 +1,23 @@
 package com.weiwei.brainstorming.model.enums;
 
+import lombok.Getter;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * 用户提交状态枚举
- */
-public enum QuestionSubmitStatusEnum {
-
-    WAITING("等待中", 0),
-    RUNNING("判题中", 1),
-    FAILED("失败", 2),
-    SUCCEED("成功", 3);
+@Getter
+public enum ExecuteCodeStatusEnum {
+    RUN_FAILED("运行失败", 2),
+    COMPILE_FAILED("编译失败", 1),
+    SUCCESS("成功", 0);
 
     private final String text;
 
     private final Integer value;
 
-    QuestionSubmitStatusEnum(String text, Integer value) {
+    ExecuteCodeStatusEnum(String text, Integer value) {
         this.text = text;
         this.value = value;
     }
@@ -40,23 +37,15 @@ public enum QuestionSubmitStatusEnum {
      * @param value
      * @return
      */
-    public static QuestionSubmitStatusEnum getEnumByValue(Integer value) {
+    public static ExecuteCodeStatusEnum getEnumByValue(Integer value) {
         if (ObjectUtils.isEmpty(value)) {
             return null;
         }
-        for (QuestionSubmitStatusEnum anEnum : QuestionSubmitStatusEnum.values()) {
+        for (ExecuteCodeStatusEnum anEnum : ExecuteCodeStatusEnum.values()) {
             if (anEnum.value.equals(value)) {
                 return anEnum;
             }
         }
         return null;
-    }
-
-    public Integer getValue() {
-        return value;
-    }
-
-    public String getText() {
-        return text;
     }
 }

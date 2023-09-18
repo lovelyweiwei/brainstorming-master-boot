@@ -1,6 +1,5 @@
 package com.weiwei.brainstorming.judge.codesandbox;
 
-import com.github.mustachejava.Code;
 import com.weiwei.brainstorming.judge.codesandbox.model.ExecuteCodeRequest;
 import com.weiwei.brainstorming.judge.codesandbox.model.ExecuteCodeResponse;
 import lombok.extern.slf4j.Slf4j;

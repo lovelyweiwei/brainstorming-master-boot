@@ -5,9 +5,13 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
+import com.weiwei.brainstorming.model.dto.question.JudgeCase;
 import com.weiwei.brainstorming.model.dto.question.JudgeConfig;
 import com.weiwei.brainstorming.model.entity.Question;
+import com.weiwei.brainstorming.model.entity.QuestionSubmit;
+import com.weiwei.brainstorming.model.enums.QuestionSubmitStatusEnum;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
@@ -43,6 +47,11 @@ public class QuestionVO implements Serializable {
     private List<String> tags;
 
     /**
+     * 题目答案
+     */
+    private String answer;
+
+    /**
      * 难度
      */
     private String difficulty;
@@ -56,6 +65,11 @@ public class QuestionVO implements Serializable {
      * 题目通过数
      */
     private Integer acceptedNum;
+
+    /**
+     * 测试用例（json 对象）
+     */
+    private List<JudgeCase> judgeCase;
 
     /**
      * 判题配置（json 对象）
@@ -129,7 +143,9 @@ public class QuestionVO implements Serializable {
         BeanUtils.copyProperties(question, questionVO);
         List<String> tagList = JSONUtil.toList(question.getTags(), String.class);
         questionVO.setTags(tagList);
+        questionVO.setJudgeCase(JSONUtil.toList(question.getJudgeCase(), JudgeCase.class));
         questionVO.setJudgeConfig(JSONUtil.toBean(question.getJudgeConfig(), JudgeConfig.class));
+
         return questionVO;
     }
 

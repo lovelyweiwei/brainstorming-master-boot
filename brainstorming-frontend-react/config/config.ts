@@ -76,7 +76,7 @@ export default defineConfig({
    * @name layout 插件
    * @doc https://umijs.org/docs/max/layout-menu
    */
-  title: '流火 Judge',
+  title: '头脑风暴 OJ',
   layout: {
     locale: true,
     ...defaultSettings,
@@ -134,7 +134,9 @@ export default defineConfig({
       requestLibPath: "import { request } from '@umijs/max'",
       // 或者使用在线的版本
       // schemaPath: "https://gw.alipayobjects.com/os/antfincdn/M%24jrzTTYJN/oneapi.json"
-      schemaPath: join(__dirname, 'oneapi.json'),
+      schemaPath: "http://localhost:8121/oj/v2/api-docs",
+      projectName: "brarinstorming",
+      // schemaPath: join(__dirname, 'oneapi.json'),
       mock: false,
     },
     {

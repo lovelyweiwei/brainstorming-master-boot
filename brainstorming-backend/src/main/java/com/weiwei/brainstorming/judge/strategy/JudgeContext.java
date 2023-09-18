@@ -1,5 +1,6 @@
 package com.weiwei.brainstorming.judge.strategy;
 
+import com.weiwei.brainstorming.judge.codesandbox.model.ExecuteCodeResponse;
 import com.weiwei.brainstorming.model.dto.question.JudgeCase;
 import com.weiwei.brainstorming.judge.codesandbox.model.JudgeInfo;
 import com.weiwei.brainstorming.model.entity.Question;
@@ -18,15 +19,13 @@ import java.util.List;
 @Data
 public class JudgeContext {
 
-    JudgeInfo judgeInfo;
-
     private List<String> inputList;
-
-    private List<String> outputList;
 
     private List<JudgeCase> judgeCaseList;
 
     private Question question;
 
     private QuestionSubmit questionSubmit;
+
+    private ExecuteCodeResponse executeCodeResponse;
 }

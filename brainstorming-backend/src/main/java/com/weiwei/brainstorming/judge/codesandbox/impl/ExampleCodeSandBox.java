@@ -23,14 +23,14 @@ public class ExampleCodeSandBox implements CodeSandBox {
     public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {
         List<String> inputList = executeCodeRequest.getInputList();
         ExecuteCodeResponse executeCodeResponse = new ExecuteCodeResponse();
-        executeCodeResponse.setOutputList(inputList);
+        //executeCodeResponse.setOutputList(inputList);
         executeCodeResponse.setMessage("测试执行成功");
         executeCodeResponse.setStatus(QuestionSubmitStatusEnum.SUCCEED.getValue());
         JudgeInfo judgeInfo = new JudgeInfo();
         judgeInfo.setMessage(JudgeInfoMessageEnum.ACCEPTED.getValue());
         judgeInfo.setMemory(100L);
         judgeInfo.setTime(100L);
-        executeCodeResponse.setJudgeInfo(judgeInfo);
+        //executeCodeResponse.setJudgeInfo(judgeInfo);
 
         return executeCodeResponse;
     }

@@ -1,19 +1,20 @@
-﻿import type {RequestOptions} from '@@/plugin-request/request';
-import type {RequestConfig} from '@umijs/max';
-import {message} from 'antd';
+﻿import type { RequestOptions } from '@@/plugin-request/request';
+import type { RequestConfig } from '@umijs/max';
+import { message } from 'antd';
 
 // 与后端约定的响应数据格式
 interface ResponseStructure {
-  code: number,
-  msg: string,
-  data: any
+  code: number;
+  msg: string;
+  data: any;
 }
 
 /**
  * @doc https://umijs.org/docs/max/request#配置
  */
 export const requestConfig: RequestConfig = {
-  baseURL: 'http://oj.antares.cool/api',
+  baseURL: 'http://localhost:8121',
+  // baseURL: 'http://oj.ggbond.online:8121',
   withCredentials: true,
   timeout: 300000,
 
@@ -23,7 +24,7 @@ export const requestConfig: RequestConfig = {
     errorThrower: (res) => {
       const { code, msg } =
         res as unknown as ResponseStructure;
-      if (code !== 200) {
+      if (code !== 0) {
         const error: any = new Error(msg);
         error.name = 'BizError';
         error.info = { code, msg };
@@ -69,7 +70,7 @@ export const requestConfig: RequestConfig = {
     (response) => {
       // 拦截响应数据，进行个性化处理
       const { data } = response as unknown as ResponseStructure;
-      if(data.code && data.code !== 200 && data.code !== 10006){
+      if (data.code && data.code !== 200 && data.code !== 10006) {
         message.error(data.msg);
       }
       return response;

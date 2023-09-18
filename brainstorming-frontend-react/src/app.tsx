@@ -1,58 +1,85 @@
-import type {Settings as LayoutSettings} from '@ant-design/pro-components';
-import type {RunTimeLayoutConfig} from '@umijs/max';
-import {history} from '@umijs/max';
+import { AvatarDropdown, AvatarName } from '@/components/AvatarDropdown';
+import { getLoginUserUsingGET } from '@/services/brarinstorming/userController';
+import { SettingDrawer } from '@ant-design/pro-layout';
+import type { RunTimeLayoutConfig } from '@umijs/max';
+import { history } from '@umijs/max';
+import { message } from 'antd';
 import defaultSettings from '../config/defaultSettings';
-import {requestConfig} from './requestConfig';
-import React from 'react';
-import {getCurrentUser} from "@/services/user/api";
-import {AvatarDropdown, AvatarName} from "@/components/AvatarDropdown";
-import {message} from "antd";
+import {requestConfig} from "@/requestConfig";
 
-const loginPath = 'http://blog.antares.cool/user/login';
+const loginPath = '/user/login';
 
 /**
  * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
  * */
 export async function getInitialState(): Promise<{
-  settings?: Partial<LayoutSettings>;
-  currentUser?: User.UserInfo;
-  loading?: boolean;
-  fetchUserInfo?: () => Promise<User.UserInfo | undefined>;
+  currentUser?: API.LoginUserVO;
 }> {
-  //获取用户信息，这是一个异步请求(只是一个方法，不会真正执行)
   const fetchUserInfo = async () => {
     try {
-      const res = await getCurrentUser();
+      const res = await getLoginUserUsingGET();
       return res.data;
     } catch (error) {
-      message.error('未登录！');
-      history.push(`${loginPath}?redirect=http://oj.antares.cool${history.location.pathname}`);
+      history.push(loginPath);
     }
     return undefined;
   };
-
-  const currentUser = await fetchUserInfo();
-  return {
-    fetchUserInfo,
-    currentUser,
-    settings: defaultSettings as Partial<LayoutSettings>,
-  };
+  // 如果不是登录页面，执行
+  const { location } = history;
+  if (location.pathname !== loginPath) {
+    const currentUser = await fetchUserInfo();
+    return {
+      currentUser,
+    };
+  }
+  return {};
 }
 
+// const loginPath = 'http://localhost:8121/oj/user/login';
+//
+// /**
+//  * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
+//  * */
+// export async function getInitialState(): Promise<{
+//   settings?: Partial<LayoutSettings>;
+//   currentUser?: User.UserInfo;
+//   loading?: boolean;
+//   fetchUserInfo?: () => Promise<User.UserInfo | undefined>;
+// }> {
+//   //获取用户信息，这是一个异步请求(只是一个方法，不会真正执行)
+//   const fetchUserInfo = async () => {
+//     try {
+//       const res = await getLoginUserUsingGET();
+//       return res.data;
+//     } catch (error) {
+//       message.error('未登录！');
+//       history.push(`${loginPath}?redirect=http://localhost:8121/oj${history.location.pathname}`);
+//     }
+//     return undefined;
+//   };
+//
+//   const currentUser = await fetchUserInfo();
+//   return {
+//     fetchUserInfo,
+//     currentUser,
+//     settings: defaultSettings as Partial<LayoutSettings>,
+//   };
+// }
+
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
-export const layout: RunTimeLayoutConfig = ({ initialState }) => {
+export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
   return {
     avatarProps: {
-      src: initialState?.currentUser?.avatar,
+      src: initialState?.currentUser?.userAvatar,
       title: <AvatarName />,
       render: (_, avatarChildren) => {
         return <AvatarDropdown>{avatarChildren}</AvatarDropdown>;
       },
     },
     onPageChange: () => {
-      if (!initialState?.currentUser) {
+      if (!initialState?.currentUser && location.pathname !== loginPath) {
         message.error('未登录！');
-        history.push(`${loginPath}?redirect=http://oj.antares.cool${history.location.pathname}`);
+        history.push(`${loginPath}`);
       }
     },
     layoutBgImgList: [
@@ -83,6 +110,17 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
       return (
         <>
           {children}
+          <SettingDrawer
+            disableUrlParams
+            enableDarkTheme
+            settings={defaultSettings}
+            onSettingChange={(settings) => {
+              setInitialState((preInitialState) => ({
+                ...preInitialState,
+                settings,
+              }));
+            }}
+          />
         </>
       );
     },

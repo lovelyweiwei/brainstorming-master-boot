@@ -3,26 +3,33 @@ package com.weiwei.brainstorming.judge.codesandbox.model;
 import lombok.Data;
 
 /**
- * 题目
- *
- * @Author weiwei
- * @Date 2023/8/31 19:58
- * @Version 1.0
+ * 判题信息
  */
 @Data
 public class JudgeInfo {
+
     /**
      * 程序执行信息
      */
     private String message;
 
+    //通过用例数
+    private Integer pass;
+    //总用例数
+    private Integer total;
     /**
-     * 消耗内存(KB)
+     * 消耗内存
      */
     private Long memory;
-
     /**
-     * 消耗时间 (ms)
+     * 消耗时间（KB）
      */
     private Long time;
+
+    //状态
+    private String status;
+
+    private String input;
+    private String output;
+    private String expectedOutput;
 }

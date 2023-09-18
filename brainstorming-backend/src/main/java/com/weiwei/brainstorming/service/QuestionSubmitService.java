@@ -3,14 +3,14 @@ package com.weiwei.brainstorming.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.weiwei.brainstorming.model.dto.question.QuestionQueryRequest;
+import com.weiwei.brainstorming.model.dto.questionsubmit.QuestionRunRequest;
 import com.weiwei.brainstorming.model.dto.questionsubmit.QuestionSubmitAddRequest;
 import com.weiwei.brainstorming.model.dto.questionsubmit.QuestionSubmitQueryRequest;
-import com.weiwei.brainstorming.model.entity.Question;
 import com.weiwei.brainstorming.model.entity.QuestionSubmit;
 import com.weiwei.brainstorming.model.entity.User;
+import com.weiwei.brainstorming.model.vo.QuestionRunResult;
 import com.weiwei.brainstorming.model.vo.QuestionSubmitVO;
-import com.weiwei.brainstorming.model.vo.QuestionVO;
+import com.weiwei.brainstorming.model.vo.SubmitSummaryVO;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -54,4 +54,8 @@ public interface QuestionSubmitService extends IService<QuestionSubmit> {
      * @return
      */
     Page<QuestionSubmitVO> getQuestionSubmitVOPage(Page<QuestionSubmit> questionSubmitPage, User loginUser);
+
+    SubmitSummaryVO getSubmitSummary(HttpServletRequest request);
+
+    QuestionRunResult doQuestionRun(QuestionRunRequest questionRunRequest);
 }

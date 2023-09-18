@@ -5,10 +5,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.weiwei.brainstorming.model.dto.question.QuestionQueryRequest;
 import com.weiwei.brainstorming.model.entity.Question;
-import com.weiwei.brainstorming.model.entity.Question;
 import com.weiwei.brainstorming.model.vo.QuestionVO;
+import com.weiwei.brainstorming.model.vo.SafeQuestionVO;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @author Administrator
@@ -30,7 +31,7 @@ public interface QuestionService extends IService<Question> {
      * @param questionQueryRequest
      * @return
      */
-    QueryWrapper<Question> getQueryWrapper(QuestionQueryRequest questionQueryRequest);
+    QueryWrapper<Question> getQueryWrapper(QuestionQueryRequest questionQueryRequest, HttpServletRequest request);
 
     /**
      * 获取题目封装
@@ -49,4 +50,13 @@ public interface QuestionService extends IService<Question> {
      * @return
      */
     Page<QuestionVO> getQuestionVOPage(Page<Question> questionPage, HttpServletRequest request);
+
+    List<String> getQuestionTags();
+
+    /**
+     * 对象转包装类
+     * @param question
+     * @return
+     */
+    SafeQuestionVO objToVo(Question question, Long id);
 }

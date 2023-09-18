@@ -17,8 +17,9 @@ import lombok.Data;
 public class Question implements Serializable {
     /**
      * id  防止数据被爬，使用assign_id
+     * 为了前端响应解决，暂时换回auto
      */
-    @TableId(type = IdType.ASSIGN_ID)
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**

@@ -1,14 +1,28 @@
 ﻿export default [
   {
-    path: '/problemset/all',
-    name: '题库',
-    icon: 'profile',
-    component: './Problem/ProblemSet'
+    name: '用户',
+    path: '/user',
+    layout: false,
+    routes: [
+      { path: '/user/login', component: './User/Login' },
+      { path: '/user/register', name: '注册', component: './User/Register' },
+    ],
   },
   {
-    path: '/problemset',
+    path: '/questionset/all',
+    name: '题库',
+    icon: 'profile',
+    component: './Question/QuestionSet',
+  },
+  {
+    path: '/questionset',
     routes: [
-      { name: '题目详情', path: '/problemset/:id', component: './Problem/ProblemDetail', hideInMenu: true},
+      {
+        name: '题目详情',
+        path: '/questionset/:id',
+        component: './Question/QuestionDetail',
+        hideInMenu: true,
+      },
     ],
   },
   {
@@ -16,8 +30,8 @@
     name: '管理页',
     icon: 'crown',
     access: 'canAdmin',
-    component: './Admin'
+    component: './Admin',
   },
-  { path: '/', redirect: '/problemset/all' },
+  { path: '/', redirect: '/questionset/all' },
   { path: '*', layout: false, component: './404' },
 ];

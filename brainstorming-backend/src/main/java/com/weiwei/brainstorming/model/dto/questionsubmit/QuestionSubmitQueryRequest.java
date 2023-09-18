@@ -13,6 +13,8 @@ import java.io.Serializable;
 @EqualsAndHashCode(callSuper = true)
 public class QuestionSubmitQueryRequest extends PageRequest implements Serializable {
 
+    private String id;
+
     /**
      * 编程语言
      */

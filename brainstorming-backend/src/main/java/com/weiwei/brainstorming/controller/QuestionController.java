@@ -1,5 +1,7 @@
 package com.weiwei.brainstorming.controller;
 
+import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
 import com.weiwei.brainstorming.annotation.AuthCheck;
@@ -11,24 +13,27 @@ import com.weiwei.brainstorming.constant.UserConstant;
 import com.weiwei.brainstorming.exception.BusinessException;
 import com.weiwei.brainstorming.exception.ThrowUtils;
 import com.weiwei.brainstorming.model.dto.question.*;
+import com.weiwei.brainstorming.model.dto.questionsubmit.QuestionRunRequest;
 import com.weiwei.brainstorming.model.dto.questionsubmit.QuestionSubmitAddRequest;
 import com.weiwei.brainstorming.model.dto.questionsubmit.QuestionSubmitQueryRequest;
 import com.weiwei.brainstorming.model.entity.Question;
 import com.weiwei.brainstorming.model.entity.QuestionSubmit;
 import com.weiwei.brainstorming.model.entity.User;
-import com.weiwei.brainstorming.model.vo.QuestionSubmitVO;
-import com.weiwei.brainstorming.model.vo.QuestionVO;
+import com.weiwei.brainstorming.model.vo.*;
 import com.weiwei.brainstorming.service.QuestionService;
 import com.weiwei.brainstorming.service.QuestionSubmitService;
 import com.weiwei.brainstorming.service.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.script.BucketAggregationSelectorScript;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 题目接口
@@ -36,6 +41,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/question")
 @Slf4j
+@CrossOrigin
 public class QuestionController {
 
     @Resource
@@ -45,6 +51,7 @@ public class QuestionController {
     private UserService userService;
 
     @Resource
+    @Lazy
     private QuestionSubmitService questionSubmitService;
 
     private final static Gson GSON = new Gson();
@@ -59,6 +66,7 @@ public class QuestionController {
      * @return
      */
     @PostMapping("/add")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Long> addQuestion(@RequestBody QuestionAddRequest questionAddRequest, HttpServletRequest request) {
         if (questionAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -150,13 +158,14 @@ public class QuestionController {
     }
 
     /**
-     * 根据 id 获取（未脱敏）
+     * 根据 id 获取完整信息（未脱敏）只有管理员能调用
      *
      * @param id
      * @return
      */
     @GetMapping("/get")
-    public BaseResponse<Question> getQuestionById(long id, HttpServletRequest request) {
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<QuestionVO> getQuestionById(long id, HttpServletRequest request) {
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -169,7 +178,8 @@ public class QuestionController {
         if (!question.getUserId().equals(loginUser.getId()) || !userService.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
-        return ResultUtils.success(question);
+        QuestionVO questionVO = QuestionVO.objToVo(question);
+        return ResultUtils.success(questionVO);
     }
 
     /**
@@ -179,7 +189,7 @@ public class QuestionController {
      * @return
      */
     @GetMapping("/get/vo")
-    public BaseResponse<QuestionVO> getQuestionVOById(long id, HttpServletRequest request) {
+    public BaseResponse<SafeQuestionVO> getQuestionVOById(long id, HttpServletRequest request) {
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -187,7 +197,8 @@ public class QuestionController {
         if (question == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
-        return ResultUtils.success(questionService.getQuestionVO(question, request));
+        SafeQuestionVO vo = questionService.objToVo(question, userService.getLoginUser(request).getId());
+        return ResultUtils.success(vo);
     }
 
     /**
@@ -205,8 +216,50 @@ public class QuestionController {
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
         Page<Question> questionPage = questionService.page(new Page<>(current, size),
-                questionService.getQueryWrapper(questionQueryRequest));
+                questionService.getQueryWrapper(questionQueryRequest, request));
         return ResultUtils.success(questionService.getQuestionVOPage(questionPage, request));
+    }
+
+    /**
+     * 分页获取列表（封装类）
+     *
+     * @param questionQueryRequest
+     * @return
+     */
+    @PostMapping("/page/vo/safe")
+    public BaseResponse<Page<SafeQuestionVO>> listSafeQuestionVOByPage(@RequestBody QuestionQueryRequest questionQueryRequest,
+                                                                       HttpServletRequest request) {
+        long pageNum = questionQueryRequest.getCurrent();
+        long pageSize = questionQueryRequest.getPageSize();
+        // 限制爬虫
+        ThrowUtils.throwIf(pageSize > 20, ErrorCode.PARAMS_ERROR);
+
+        Wrapper<Question> queryWrapper = questionService.getQueryWrapper(questionQueryRequest, request);
+        if (queryWrapper != null) {
+            Page<Question> questionPage = questionService.page(new Page<>(pageNum, pageSize), queryWrapper);
+
+            List<SafeQuestionVO> records = questionPage.getRecords().stream()
+                    .map(question -> questionService.objToVo(question, userService.getLoginUser(request).getId()))
+                    .collect(Collectors.toList());
+            Page<SafeQuestionVO> page = new Page<>(pageNum, pageSize, questionPage.getTotal());
+            page.setRecords(records);
+            return ResultUtils.success(page);
+        } else {
+            Page<SafeQuestionVO> page = new Page<>(pageNum, pageSize, 0);
+            return ResultUtils.success(page);
+        }
+    }
+
+
+    /**
+     * 获取所有标签
+     *
+     * @return
+     */
+    @GetMapping("/tags")
+    public BaseResponse<List<String>> getQuestionTags() {
+        List<String> tags = questionService.getQuestionTags();
+        return ResultUtils.success(tags);
     }
 
     /**
@@ -229,7 +282,7 @@ public class QuestionController {
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
         Page<Question> questionPage = questionService.page(new Page<>(current, size),
-                questionService.getQueryWrapper(questionQueryRequest));
+                questionService.getQueryWrapper(questionQueryRequest, request));
         return ResultUtils.success(questionService.getQuestionVOPage(questionPage, request));
     }
 
@@ -247,7 +300,7 @@ public class QuestionController {
         long current = questionQueryRequest.getCurrent();
         long size = questionQueryRequest.getPageSize();
         Page<Question> questionPage = questionService.page(new Page<>(current, size),
-                questionService.getQueryWrapper(questionQueryRequest));
+                questionService.getQueryWrapper(questionQueryRequest, request));
         return ResultUtils.success(questionPage);
     }
 
@@ -309,10 +362,30 @@ public class QuestionController {
         if (questionSubmitAddRequest == null || questionSubmitAddRequest.getQuestionId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+
         // 登录才能提交题目
         final User loginUser = userService.getLoginUser(request);
         long questionSubmitId = questionSubmitService.doQuestionSubmit(questionSubmitAddRequest, loginUser);
         return ResultUtils.success(questionSubmitId);
+    }
+
+    /**
+     * 运行题目（页面）
+     *
+     * @param questionRunRequest
+     * @return
+     */
+    @PostMapping
+    public BaseResponse<QuestionRunResult> doQuestionRun(@RequestBody @NotNull @Valid QuestionRunRequest questionRunRequest,
+                                                         HttpServletRequest request) {
+        User currentUser = userService.getLoginUser(request);
+        //未登录
+        if (currentUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+
+        QuestionRunResult questionRunResult = questionSubmitService.doQuestionRun(questionRunRequest);
+        return ResultUtils.success(questionRunResult);
     }
 
     /**
@@ -333,5 +406,28 @@ public class QuestionController {
         User loginUser = userService.getLoginUser(request);
         // 返回脱敏信息
         return ResultUtils.success(questionSubmitService.getQuestionSubmitVOPage(questionSubmitPage, loginUser));
+    }
+
+    /**
+     * 获取某次历史提交的详细信息
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/question_submit/get/vo")
+    public BaseResponse<QuestionSubmitVO> getQuestionSubmitVoById(Long id, HttpServletRequest request) {
+        User currentUser = userService.getLoginUser(request);
+        if (currentUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        QuestionSubmit submit = questionSubmitService.getById(id);
+        // 返回脱敏信息
+        return ResultUtils.success(QuestionSubmitVO.objToVo(submit));
+    }
+
+    @GetMapping("/summary")
+    public BaseResponse<SubmitSummaryVO> getSubmitSummary(HttpServletRequest request) {
+        SubmitSummaryVO vo = questionSubmitService.getSubmitSummary(request);
+        return ResultUtils.success(vo);
     }
 }
